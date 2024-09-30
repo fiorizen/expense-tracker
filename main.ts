@@ -53,18 +53,41 @@ return `Expense deleted successfully`
 
 export function readExpenses(): Expense[] {
   // TODO: Implement this function
-  const json = fs.readFileSync(DATA_FILE, "utf-8");
-  if (!json) return []
-  return JSON.parse(json)
+  try {
+    const json = fs.readFileSync(DATA_FILE, "utf-8");
+    if (!json) return []
+    return JSON.parse(json)
+      
+  } catch (error) {
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
+      fs.writeFileSync(DATA_FILE, '[]', { encoding: 'utf-8' });
+      return []
+    } else {
+      throw error
+    }
+        
+  }
 }
 
 /**
  * Convert given records and overwrite to json file
  */
 export function writeRecords(list: Expense[]): void {
-  if (!list) return
-  const str = list?.length > 0 ? JSON.stringify(list) : ''
-  fs.writeFileSync(DATA_FILE, str, { encoding: 'utf-8' })
+  if (!list) return;
+  const str = list?.length > 0 ? JSON.stringify(list, null, 2) : '[]'; // Ensure valid JSON format
+  try {
+    fs.writeFileSync(DATA_FILE, str, { encoding: 'utf-8' });
+  } catch (error) {
+    console.error(error)
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
+      console.error(error)
+      // File does not exist, create it
+      fs.writeFileSync(DATA_FILE, '[]', { encoding: 'utf-8' });
+      fs.writeFileSync(DATA_FILE, str, { encoding: 'utf-8' });
+    } else {
+      throw error;
+    }
+  }
 }
 
 export function getDateStringFromISO(dateString: string) {
