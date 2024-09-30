@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import fs from "node:fs";
 import { afterEach, beforeEach, describe, it, mock } from "node:test";
 
-import { parseOptions, readExpenses } from "./main.js";
+import { addExpense, parseOptions, readExpenses } from "./main.js";
 
 // テスト中は実際のファイルは触らない
 mock.method(fs, "readFileSync", mfs.readFileSync);
@@ -56,5 +56,45 @@ describe("readExpenses", () => {
   it("Happy: should return all records", () => {
     const records = readExpenses();
     assert.deepEqual(records, initialRecords);
+  });
+});
+
+describe("addExpense", () => {
+  beforeEach(() => {
+    const initialJson = [];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialJson) });
+  });
+  afterEach(() => vol.reset());
+
+  it("Happy: 既存レコードが存在しない時はID1で登録する", () => {
+    const expense = {
+      id: 1,
+      amount: 1000,
+      description: "lunch",
+      date: startTime,
+    };
+    const results = addExpense(expense.amount, expense.description);
+    assert.deepEqual(results, "Expense added successfully (ID: 1)");
+    const expenses = readExpenses();
+    assert.deepEqual(expenses, [expense]);
+  });
+
+  it("Happy: 追加時のIDは既存レコードの最大値+1", () => {
+    const initialRecords = [
+      { id: 1, description: "expense1", amount: 1000 },
+      { id: 2, description: "expense2", amount: 2000 },
+    ];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialRecords) });
+
+    const expense = {
+      id: 3,
+      amount: 3000,
+      description: "dinner",
+      date: startTime,
+    };
+    const results = addExpense(expense.amount, expense.description);
+    assert.deepEqual(results, "Expense added successfully (ID: 3)");
+    const expenses = readExpenses();
+    assert.deepEqual(expenses, [...initialRecords, expense]);
   });
 });

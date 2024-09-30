@@ -1,6 +1,14 @@
 #!/usr/bin/env tsx
 
 import fs from "node:fs";
+import path from "path";
+
+type Expense = {
+  id: number
+  amount: number
+  description: string
+  date: string
+}
 
 const COMMANDS = {
   add: 'add',
@@ -9,7 +17,7 @@ const COMMANDS = {
   summary: "summary"
 }
 
-export const DATA_FILE = "expenses.json"
+export const DATA_FILE = path.resolve("expenses.json")
 
 function showUsage() {
   console.log("Usage:");
@@ -26,11 +34,13 @@ function handleError(error?: unknown) {
 }
 
 export function addExpense(
-  amount: number,
-  description: string,
+  amount: Expense["amount"],
+  description: Expense["description"],
 ) {
-  // TODO: Implement this function
-  return `Add expense: ${amount} ${description}`
+  const currentList = readExpenses()
+  const id = Math.max(...currentList.map((item) => item.id), 0) + 1
+  writeRecords([...currentList, { id, amount, description, date: new Date().toISOString() }])
+  return `Expense added successfully (ID: ${id})`
 }
 
 export function deleteExpense(id: number) {
@@ -38,12 +48,22 @@ export function deleteExpense(id: number) {
 return `Delete expense: ${id}`
 }
 
-export function readExpenses() {
+export function readExpenses(): Expense[] {
   // TODO: Implement this function
   const json = fs.readFileSync(DATA_FILE, "utf-8");
   if (!json) return []
   return JSON.parse(json)
 }
+
+/**
+ * Convert given records and overwrite to json file
+ */
+export function writeRecords(list: Expense[]): void {
+  if (!list) return
+  const str = list?.length > 0 ? JSON.stringify(list) : ''
+  fs.writeFileSync(DATA_FILE, str, { encoding: 'utf-8' })
+}
+
 
 export function getExpenseList() {
   // TODO: Implement this function
