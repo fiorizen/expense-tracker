@@ -114,7 +114,7 @@ export function getExpenseSummary() {
 export function parseOptions(optionString: string) {
   if (!optionString) throw new Error("Invalid options");
   const options = optionString.split("--").slice(1);
-  const parsedOptions = options.reduce((acc: {[key in string]: string}, option) => {
+  const parsedOptions = options.reduce((acc: { [key in string]: string }, option) => {
     const [key, value] = option.split(" ");
     acc[key] = value ?? "";
     return acc;
@@ -158,22 +158,22 @@ async function main() {
         const options = parseOptions(optionString)
         if (!options?.amount || !options?.description) handleError(new Error("Invalid options"))
         results = [addExpense(Number(options.amount), options.description)]
-      break
+        break
       }
       case COMMANDS.delete: {
         const options = parseOptions(optionString)
         if (!options?.id) handleError(new Error("Invalid options"))
         results = [deleteExpense(Number(options.id))]
-      break
+        break
       }
       case COMMANDS.list: {
         results = getExpenseList()
         break
       }
       case COMMANDS.summary: {
-        results = getExpenseSummary()
+        results = [getExpenseSummary()]
         break
-      }        
+      }
       default:
         showUsage()
         return
