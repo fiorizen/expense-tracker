@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, it, mock } from "node:test";
 import {
   addExpense,
   deleteExpense,
+  getExpenseList,
   parseOptions,
   readExpenses,
 } from "./main.js";
@@ -127,6 +128,40 @@ describe("deleteExpense", () => {
     assert.throws(() => deleteExpense());
     assert.throws(() => {
       deleteExpense(3);
+    });
+  });
+});
+
+describe("getExpenseList", () => {
+  beforeEach(() => {
+    const initialJson = [
+      { id: 1, description: "expense1", amount: 1000, date: startTime },
+      { id: 2, description: "expense2!", amount: 200, date: startTime },
+      { id: 100, description: "expense100", amount: 1, date: startTime },
+    ];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialJson) });
+  });
+  afterEach(() => vol.reset());
+
+  it("Happy: should return all expenses", () => {
+    const expenses = getExpenseList();
+    assert.deepEqual(expenses, [
+      `  1  2024-01-02  expense1    $1000`,
+      `  2  2024-01-02  expense2!   $200`,
+      `100  2024-01-02  expense100  $1`,
+    ]);
+  });
+
+  it("Happy: should return an empty list if no expenses exist", () => {
+    vol.fromJSON({ "expenses.json": JSON.stringify([]) });
+    const expenses = getExpenseList();
+    assert.deepEqual(expenses, []);
+  });
+
+  it("Sad: should throw error if expenses file is missing", () => {
+    vol.reset();
+    assert.throws(() => {
+      getExpenseList();
     });
   });
 });

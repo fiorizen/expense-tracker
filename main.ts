@@ -67,10 +67,16 @@ export function writeRecords(list: Expense[]): void {
   fs.writeFileSync(DATA_FILE, str, { encoding: 'utf-8' })
 }
 
+export function getDateStringFromISO(dateString: string) {
+  const date = new Date(dateString)
+  return date.toISOString().split("T")[0]
+}
 
 export function getExpenseList() {
-  // TODO: Implement this function
-  return ["1. $10 - Lunch", "2. $10 - Dinner"]
+  const currentList = readExpenses()
+  const maxIdLength = Math.max(...currentList.map((item) => item.id.toString().length))
+  const maxDescriptionLength = Math.max(...currentList.map((item) => item.description.length))
+  return currentList.map((item) => `${String(item.id).padStart(maxIdLength, " ")}  ${getDateStringFromISO(item.date)}  ${item.description.padEnd(maxDescriptionLength, " ")}  $${item.amount}`)
 }
 
 export function getExpenseSummary() {
