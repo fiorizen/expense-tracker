@@ -3,7 +3,12 @@ import { strict as assert } from "node:assert";
 import fs from "node:fs";
 import { afterEach, beforeEach, describe, it, mock } from "node:test";
 
-import { addExpense, parseOptions, readExpenses } from "./main.js";
+import {
+  addExpense,
+  deleteExpense,
+  parseOptions,
+  readExpenses,
+} from "./main.js";
 
 // テスト中は実際のファイルは触らない
 mock.method(fs, "readFileSync", mfs.readFileSync);
@@ -96,5 +101,32 @@ describe("addExpense", () => {
     assert.deepEqual(results, "Expense added successfully (ID: 3)");
     const expenses = readExpenses();
     assert.deepEqual(expenses, [...initialRecords, expense]);
+  });
+});
+
+describe("deleteExpense", () => {
+  beforeEach(() => {
+    const initialJson = [
+      { id: 1, description: "expense1", amount: 1000 },
+      { id: 2, description: "expense2", amount: 2000 },
+    ];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialJson) });
+  });
+  afterEach(() => vol.reset());
+
+  it("Happy: should delete record with given ID", () => {
+    const results = deleteExpense(1);
+    assert.deepEqual(results, "Expense deleted successfully");
+    const expenses = readExpenses();
+    assert.deepEqual(expenses, [
+      { id: 2, description: "expense2", amount: 2000 },
+    ]);
+  });
+
+  it("Sad: should throw error when ID is not found", () => {
+    assert.throws(() => deleteExpense());
+    assert.throws(() => {
+      deleteExpense(3);
+    });
   });
 });

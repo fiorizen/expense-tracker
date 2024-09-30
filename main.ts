@@ -44,8 +44,11 @@ export function addExpense(
 }
 
 export function deleteExpense(id: number) {
-  // TODO: Implement this function
-return `Delete expense: ${id}`
+  const currentList = readExpenses()
+    if (!id || !currentList.some(item => item.id === id)) throw new Error("Invalid ID")
+  const newList = currentList.filter((item) => item.id !== id)
+writeRecords(newList)
+return `Expense deleted successfully`
 }
 
 export function readExpenses(): Expense[] {
