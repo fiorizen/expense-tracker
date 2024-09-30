@@ -49,10 +49,11 @@ export function getExpenseSummary() {
  * @example parseOptions("--description 'This is a test' --amount 100")
  */
 export function parseOptions(optionString: string) {
+  if (!optionString) throw new Error("Invalid options");
   const options = optionString.split("--").slice(1);
   const parsedOptions = options.reduce((acc: {[key in string]: string}, option) => {
     const [key, value] = option.split(" ");
-    acc[key] = value;
+    acc[key] = value ?? "";
     return acc;
   }, {});
   return parsedOptions;

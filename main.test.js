@@ -1,6 +1,9 @@
 import { fs as mfs } from "memfs";
+import { strict as assert } from "node:assert";
 import fs from "node:fs";
-import { afterEach, beforeEach, mock } from "node:test";
+import { afterEach, beforeEach, describe, it, mock } from "node:test";
+
+import { parseOptions } from "./main.js";
 
 // テスト中は実際のファイルは触らない
 mock.method(fs, "readFileSync", mfs.readFileSync);
@@ -21,3 +24,21 @@ afterEach(() => {
 // TODO: 各関数のテストコード実装
 // jsonファイルはモックを使う
 // 実行日はstartTimeでモックする
+describe("parseOptions", () => {
+  it("Happy: should return options object from correct input", () => {
+    const optionString = `--arg1 value1 --arg2 --arg3 value3`;
+    const options = parseOptions(optionString);
+    assert.deepEqual(options, {
+      arg1: "value1",
+      arg2: "",
+      arg3: "value3",
+    });
+  });
+
+  it("Sad: should throw error when invalid option is given", () => {
+    const optionString = ``;
+    assert.throws(() => {
+      parseOptions(optionString);
+    });
+  });
+});
