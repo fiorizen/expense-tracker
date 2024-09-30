@@ -1,9 +1,9 @@
-import { fs as mfs } from "memfs";
+import { fs as mfs, vol } from "memfs";
 import { strict as assert } from "node:assert";
 import fs from "node:fs";
 import { afterEach, beforeEach, describe, it, mock } from "node:test";
 
-import { parseOptions } from "./main.js";
+import { parseOptions, readExpenses } from "./main.js";
 
 // テスト中は実際のファイルは触らない
 mock.method(fs, "readFileSync", mfs.readFileSync);
@@ -40,5 +40,21 @@ describe("parseOptions", () => {
     assert.throws(() => {
       parseOptions(optionString);
     });
+  });
+});
+
+describe("readExpenses", () => {
+  const initialRecords = [
+    { id: 1, description: "expense1", amount: 1000 },
+    { id: 2, description: "expense2", amount: 2000 },
+  ];
+  beforeEach(() => {
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialRecords) });
+  });
+  afterEach(() => vol.reset());
+
+  it("Happy: should return all records", () => {
+    const records = readExpenses();
+    assert.deepEqual(records, initialRecords);
   });
 });

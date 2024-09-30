@@ -1,11 +1,15 @@
 #!/usr/bin/env tsx
 
+import fs from "node:fs";
+
 const COMMANDS = {
   add: 'add',
   list: 'list',
   delete: 'delete',
   summary: "summary"
 }
+
+export const DATA_FILE = "expenses.json"
 
 function showUsage() {
   console.log("Usage:");
@@ -32,6 +36,13 @@ export function addExpense(
 export function deleteExpense(id: number) {
   // TODO: Implement this function
 return `Delete expense: ${id}`
+}
+
+export function readExpenses() {
+  // TODO: Implement this function
+  const json = fs.readFileSync(DATA_FILE, "utf-8");
+  if (!json) return []
+  return JSON.parse(json)
 }
 
 export function getExpenseList() {
