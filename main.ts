@@ -102,10 +102,22 @@ export function getExpenseList() {
   return currentList.map((item) => `${String(item.id).padStart(maxIdLength, " ")}  ${getDateStringFromISO(item.date)}  ${item.description.padEnd(maxDescriptionLength, " ")}  $${item.amount}`)
 }
 
-export function getExpenseSummary() {
+export function getEnglishMonthNameFromMonthNumber(monthNumber: number) {
+  if (!monthNumber || monthNumber > 12 || monthNumber <= 0) throw new Error("Invalid month number")
+  return new Date(0, monthNumber - 1, 1).toLocaleString("en-US", { month: "long" })
+}
+
+export function getExpenseSummary(month?: number) {
   const currentList = readExpenses()
-  const total = currentList.reduce((acc, item) => acc + item.amount, 0)
-  return `Total expenses: $${total}`
+  if (month) {
+    const total = currentList
+      .filter((item) => new Date(item.date).getMonth() === month - 1)
+      .reduce((acc, item) => acc + item.amount, 0)
+    return `Total expenses for ${getEnglishMonthNameFromMonthNumber(month)}: $${total}`
+  } else {
+    const total = currentList.reduce((acc, item) => acc + item.amount, 0)
+    return `Total expenses: $${total}`
+    }
 }
 
 /**
@@ -172,7 +184,9 @@ async function main() {
         break
       }
       case COMMANDS.summary: {
-        results = [getExpenseSummary()]
+        const options = parseOptions(optionString)
+        const month = options?.month ?  Number(options.month):  undefined
+        results = [getExpenseSummary(month)]
         break
       }
       default:

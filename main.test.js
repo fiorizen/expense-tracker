@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, it, mock } from "node:test";
 import {
   addExpense,
   deleteExpense,
+  getEnglishMonthNameFromMonthNumber,
   getExpenseList,
   getExpenseSummary,
   parseOptions,
@@ -194,5 +195,38 @@ describe("getExpenseSummary", () => {
     assert.throws(() => {
       getExpenseSummary();
     });
+  });
+
+  it("Happy: receive month option and return that month's total amount", () => {
+    const initialJson = [
+      { id: 1, description: "expense1", amount: 100, date: startTime },
+      {
+        id: 2,
+        description: "expense2",
+        amount: 2000,
+        date: "2024-02-02T11:01:58.135Z",
+      },
+      {
+        id: 3,
+        description: "expense3",
+        amount: 3,
+        date: "2024-02-04T11:01:58.135Z",
+      },
+    ];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialJson) });
+    const summary = getExpenseSummary(2);
+    assert.deepEqual(summary, "Total expenses for February: $2003");
+  });
+});
+
+describe("getEnglishMonthNameFromMonthNumber", () => {
+  it("Happy: Return English name for given number", () => {
+    assert.equal(getEnglishMonthNameFromMonthNumber(1), "January");
+    assert.equal(getEnglishMonthNameFromMonthNumber(12), "December");
+  });
+  it("Sad: Return English name for given number", () => {
+    assert.throws(() => getEnglishMonthNameFromMonthNumber());
+    assert.throws(() => getEnglishMonthNameFromMonthNumber(0));
+    assert.throws(() => getEnglishMonthNameFromMonthNumber(13));
   });
 });
