@@ -7,6 +7,7 @@ import {
   addExpense,
   deleteExpense,
   getExpenseList,
+  getExpenseSummary,
   parseOptions,
   readExpenses,
 } from "./main.js";
@@ -162,6 +163,36 @@ describe("getExpenseList", () => {
     vol.reset();
     assert.throws(() => {
       getExpenseList();
+    });
+  });
+});
+
+describe("getExpenseSummary", () => {
+  beforeEach(() => {
+    const initialJson = [
+      { id: 1, description: "expense1", amount: 100, date: startTime },
+      { id: 2, description: "expense2", amount: 2000, date: startTime },
+      { id: 100, description: "expense3", amount: 3, date: startTime },
+    ];
+    vol.fromJSON({ "expenses.json": JSON.stringify(initialJson) });
+  });
+  afterEach(() => vol.reset());
+
+  it("Happy: should return the total amount of all expenses", () => {
+    const summary = getExpenseSummary();
+    assert.deepEqual(summary, "Total expenses: $2103");
+  });
+
+  it("Happy: should return zero if no expenses exist", () => {
+    vol.fromJSON({ "expenses.json": JSON.stringify([]) });
+    const summary = getExpenseSummary();
+    assert.deepEqual(summary, "Total expenses: $0");
+  });
+
+  it("Sad: should throw error if expenses file is missing", () => {
+    vol.reset();
+    assert.throws(() => {
+      getExpenseSummary();
     });
   });
 });

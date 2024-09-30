@@ -45,10 +45,10 @@ export function addExpense(
 
 export function deleteExpense(id: number) {
   const currentList = readExpenses()
-    if (!id || !currentList.some(item => item.id === id)) throw new Error("Invalid ID")
+  if (!id || !currentList.some(item => item.id === id)) throw new Error("Invalid ID")
   const newList = currentList.filter((item) => item.id !== id)
-writeRecords(newList)
-return `Expense deleted successfully`
+  writeRecords(newList)
+  return `Expense deleted successfully`
 }
 
 export function readExpenses(): Expense[] {
@@ -103,8 +103,9 @@ export function getExpenseList() {
 }
 
 export function getExpenseSummary() {
-  // TODO: Implement this function
-  return ["Total expense: $20"]
+  const currentList = readExpenses()
+  const total = currentList.reduce((acc, item) => acc + item.amount, 0)
+  return `Total expenses: $${total}`
 }
 
 /**
